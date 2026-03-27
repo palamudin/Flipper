@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Split-Flap Board Nav Collapsible</title>
+  <style>
+    :root {
+      --bg: #0f141b;
+      --panel: #18212b;
+      --panel-2: #111820;
+      --line: #2a3644;
+      --text: #e9eef5;
+      --muted: #97a6b6;
+      --accent: #caa55a;
+      --shadow: 0 16px 45px rgba(0,0,0,.32);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(202,165,90,.08), transparent 30%),
+        linear-gradient(180deg, #0c1015 0%, #121923 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .container {
+      width: min(100vw - 24px, 1800px);
+      margin: 12px auto;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,.06));
+    }
+
+    .card-header h1,
+    .card-header h2,
+    .card-header h3 {
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: .02em;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.25;
+    }
+
+    .nav-strip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .nav-title-wrap {
+      display: grid;
+      gap: 4px;
+      min-width: 220px;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .collapse-btn {
+      min-width: 140px;
+    }
+
+    .header-panel.collapsed .config-section {
+      display: none;
+    }
+
+    .config-section {
+      border-top: 1px solid var(--line);
+    }
+
+    .card-body {
+      padding: 10px 14px;
+      display: grid;
+      grid-template-columns: minmax(220px, 1.05fr) 130px 150px minmax(320px, 1fr) 220px;
+      gap: 8px 10px;
+      align-items: start;
+    }
+
+    .card-body > div:nth-child(1) { grid-column: 1; }
+    .card-body > div:nth-child(2) { grid-column: 2 / span 2; }
+    .card-body > div:nth-child(3) { grid-column: 4; }
+    .card-body > div:nth-child(4) { grid-column: 5; }
+    .card-body > div:nth-child(5) {
+      grid-column: 5;
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+    .card-body > div:nth-child(6) { grid-column: 1 / span 3; }
+
+    label {
+      display: block;
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    textarea,
+    input,
+    select,
+    button {
+      font: inherit;
+    }
+
+    textarea,
+    input,
+    select {
+      width: 100%;
+      border: 1px solid #334153;
+      background: #0e151d;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 10px;
+      outline: none;
+      transition: border-color .2s ease, transform .12s ease;
+      font-size: 14px;
+    }
+
+    textarea:focus,
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+    }
+
+    textarea {
+      min-height: 88px;
+      resize: vertical;
+      font-family: Consolas, Monaco, monospace;
+      line-height: 1.22;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    button {
+      border: 1px solid #3a4b61;
+      background: linear-gradient(180deg, #223042, #18222f);
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      letter-spacing: .02em;
+      min-height: 36px;
+      transition: transform .12s ease, border-color .2s ease, background .2s ease;
+      font-size: 14px;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      border-color: var(--accent);
+    }
+
+    button.primary {
+      background: linear-gradient(180deg, #c6a05b, #94723a);
+      color: #15110a;
+      border-color: #d2b174;
+    }
+
+    .help {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.25;
+      padding-top: 2px;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .mini-stat {
+      background: #111820;
+      border: 1px solid #2f3b48;
+      border-radius: 14px;
+      padding: 8px 10px;
+    }
+
+    .mini-stat .k {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: var(--muted);
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    .mini-stat .v {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .board-wrap {
+      padding: 18px;
+    }
+
+    .board-shell {
+      background: linear-gradient(180deg, #202a35 0%, #111820 100%);
+      border: 1px solid #344456;
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 30px 70px rgba(0,0,0,.34);
+    }
+
+    .board-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .board-title {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      background: #0b1016;
+      border: 1px solid #374657;
+      color: var(--accent);
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-weight: 800;
+    }
+
+    .clock {
+      font-family: Consolas, monospace;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .board-table {
+      display: grid;
+      gap: 8px;
+    }
+
+    .board-row,
+    .board-head {
+      display: grid;
+      grid-template-columns: 130px 150px minmax(280px, 1fr) 380px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .board-head {
+      padding: 0 4px 6px;
+      color: #b5c1cd;
+      font-size: 12px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+
+    .board-row {
+      background: linear-gradient(180deg, rgba(255,255,255,.025), rgba(0,0,0,.08));
+      border: 1px solid #2c3845;
+      border-radius: 14px;
+      padding: 10px;
+    }
+
+    .flap-group {
+      display: flex;
+      gap: 4px;
+      min-height: 58px;
+      flex-wrap: nowrap;
+      overflow: hidden;
+    }
+
+    .status-group {
+      justify-content: flex-start;
+    }
+
+    .status-group .flap-char {
+      width: 22px;
+    }
+
+    .status-group .flap-half span {
+      font-size: 24px;
+    }
+
+    .status-group .flap-half.top span {
+      transform: translateY(11px);
+    }
+
+    .status-group .flap-half.bottom span {
+      transform: translateY(-11px);
+    }
+
+    .flap-char {
+      position: relative;
+      width: 30px;
+      height: 58px;
+      background: #111820;
+      border: 1px solid #394959;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 -10px 18px rgba(0,0,0,.15);
+    }
+
+    .flap-char::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(50% - .5px);
+      height: 1px;
+      background: rgba(255,255,255,.14);
+      z-index: 3;
+    }
+
+    .flap-pin {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #4c5e70;
+      top: calc(50% - 2px);
+      z-index: 4;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.2);
+    }
+
+    .flap-pin.left { left: 2px; }
+    .flap-pin.right { right: 2px; }
+
+    .flap-half {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      backface-visibility: hidden;
+      background: linear-gradient(180deg, #1d2834, #111820);
+    }
+
+    .flap-half.top {
+      top: 0;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+
+    .flap-half.bottom {
+      bottom: 0;
+      border-top: 1px solid rgba(0,0,0,.4);
+      background: linear-gradient(180deg, #131b23, #0c1218);
+    }
+
+    .flap-half span {
+      display: block;
+      font-family: "Courier New", Consolas, monospace;
+      font-size: 31px;
+      font-weight: 800;
+      line-height: 1;
+      color: #f6f2dc;
+      text-shadow: 0 1px 0 rgba(0,0,0,.4);
+      user-select: none;
+    }
+
+    .flap-half.top span { transform: translateY(14px); }
+    .flap-half.bottom span { transform: translateY(-14px); }
+
+    .flap-char.flipping .flip-top {
+      animation: flipTop var(--flip-duration, .16s) linear forwards;
+      transform-origin: bottom center;
+      z-index: 5;
+    }
+
+    .flap-char.flipping .flip-bottom {
+      animation: flipBottom var(--flip-duration, .16s) linear forwards;
+      animation-delay: var(--flip-duration, .16s);
+      transform-origin: top center;
+      z-index: 6;
+    }
+
+    @keyframes flipTop {
+      0% { transform: rotateX(0deg); filter: brightness(1); }
+      100% { transform: rotateX(-90deg); filter: brightness(.75); }
+    }
+
+    @keyframes flipBottom {
+      0% { transform: rotateX(90deg); filter: brightness(1.3); }
+      100% { transform: rotateX(0deg); filter: brightness(1); }
+    }
+
+    .status-ok .flap-half span { color: #eef7df; }
+    .status-late .flap-half span { color: #ffe3c2; }
+    .status-cancel .flap-half span { color: #ffd0d0; }
+
+    .footer-note {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 1100px) {
+      .card-body {
+        grid-template-columns: 1fr 1fr;
+      }
+      .card-body > div:nth-child(1),
+      .card-body > div:nth-child(2),
+      .card-body > div:nth-child(3),
+      .card-body > div:nth-child(4),
+      .card-body > div:nth-child(5),
+      .card-body > div:nth-child(6) {
+        grid-column: auto;
+      }
+      .btn-row {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 920px) {
+      .board-head,
+      .board-row {
+        grid-template-columns: 90px 100px minmax(180px, 1fr) 250px;
+      }
+      .flap-char {
+        width: 24px;
+        height: 48px;
+      }
+      .flap-half span {
+        font-size: 25px;
+      }
+      .flap-half.top span { transform: translateY(11px); }
+      .flap-half.bottom span { transform: translateY(-11px); }
+      .mini-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .card-body {
+        grid-template-columns: 1fr;
+      }
+      .btn-row {
+        grid-template-columns: 1fr;
+      }
+      .nav-actions {
+        width: 100%;
+      }
+      .row,
+      .board-head,
+      .board-row {
+        grid-template-columns: 1fr;
+      }
+      .board-head { display: none; }
+      .board-row { gap: 8px; }
+      .flap-group { overflow-x: auto; padding-bottom: 2px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <div class="card header-panel collapsed" id="headerPanel">
+        <div class="card-header">
+          <div class="nav-strip">
+            <div class="nav-title-wrap">
+              <h1>Split-Flap Board</h1>
+              <div class="subtitle">This whole config area collapses into a nav bar.</div>
+            </div>
+            <div class="nav-actions">
+              <button id="shuffleBtnCompact">Randomize status</button>
+              <button id="sampleArrivalsBtnCompact">Load arrivals</button>
+              <button id="sampleDeparturesBtnCompact">Load departures</button>
+              <button id="toggleHeaderBtn" class="collapse-btn">Expand nav</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="config-section">
+          <div class="card-body">
+            <div>
+              <label for="boardTitle">Board title</label>
+              <input id="boardTitle" value="Belgrade Airport — Departures" />
+            </div>
+
+            <div class="row">
+              <div>
+                <label for="flipSpeed">Flip speed</label>
+                <select id="flipSpeed">
+                  <option value="220">Slow</option>
+                  <option value="160" selected>Normal</option>
+                  <option value="90">Fast</option>
+                </select>
+              </div>
+              <div>
+                <label for="stagger">Character stagger</label>
+                <select id="stagger">
+                  <option value="10">Subtle</option>
+                  <option value="22" selected>Classic</option>
+                  <option value="35">Mechanical chaos</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label for="inputData">Input rows</label>
+              <textarea id="inputData">08:15|JU214|LONDON|BOARDING
+09:05|LH1739|MUNICH|ON TIME
+09:50|OS738|VIENNA|DELAYED
+10:20|AF1391|PARIS|GATE CHANGE
+11:10|TK1084|ISTANBUL|FINAL CALL
+12:45|W64101|ROME|ON TIME</textarea>
+            </div>
+
+            <div class="help">
+              Format: <strong>TIME|FLIGHT|DESTINATION|STATUS</strong><br>
+              One row per line. Anything longer than the display width is neatly clipped.
+            </div>
+
+            <div class="btn-row">
+              <button class="primary" id="renderBtn">Render board</button>
+              <button id="shuffleBtn">Randomize status</button>
+              <button id="sampleArrivalsBtn">Load arrivals</button>
+              <button id="sampleDeparturesBtn">Load departures</button>
+            </div>
+
+            <div class="mini-grid">
+              <div class="mini-stat">
+                <div class="k">Rows</div>
+                <div class="v" id="rowsCount">0</div>
+              </div>
+              <div class="mini-stat">
+                <div class="k">Characters flipped</div>
+                <div class="v" id="charCount">0</div>
+              </div>
+              <div class="mini-stat">
+                <div class="k">Mode</div>
+                <div class="v" id="modeLabel">Showcase</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Render</h2>
+          <div class="subtitle">Pure HTML/CSS/JS. No external CSS, no Bootstrap CDN, no extra files.</div>
+        </div>
+        <div class="board-wrap">
+          <div class="board-shell">
+            <div class="board-top">
+              <div class="board-title">
+                <div class="badge">Split-Flap Display</div>
+                <h3 id="boardTitleRender">Belgrade Airport — Departures</h3>
+              </div>
+              <div class="clock" id="clock"></div>
+            </div>
+
+            <div class="board-table" id="board">
+              <div class="board-head">
+                <div>Time</div>
+                <div>Flight</div>
+                <div>Destination</div>
+                <div>Status</div>
+              </div>
+            </div>
+
+            <div class="footer-note">
+              This is a showcase-style mechanical board effect, not a physics simulation. It focuses on the visual flip feel and clean layout in a single portable file.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CHARSET = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-./';
+    const FIELD_LENGTHS = { time: 5, flight: 6, destination: 16, status: 12 };
+    const boardEl = document.getElementById('board');
+    const inputDataEl = document.getElementById('inputData');
+    const renderBtn = document.getElementById('renderBtn');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    const sampleArrivalsBtn = document.getElementById('sampleArrivalsBtn');
+    const sampleDeparturesBtn = document.getElementById('sampleDeparturesBtn');
+    const shuffleBtnCompact = document.getElementById('shuffleBtnCompact');
+    const sampleArrivalsBtnCompact = document.getElementById('sampleArrivalsBtnCompact');
+    const sampleDeparturesBtnCompact = document.getElementById('sampleDeparturesBtnCompact');
+    const toggleHeaderBtn = document.getElementById('toggleHeaderBtn');
+    const headerPanel = document.getElementById('headerPanel');
+    const boardTitleEl = document.getElementById('boardTitle');
+    const boardTitleRenderEl = document.getElementById('boardTitleRender');
+    const rowsCountEl = document.getElementById('rowsCount');
+    const charCountEl = document.getElementById('charCount');
+    const modeLabelEl = document.getElementById('modeLabel');
+    const flipSpeedEl = document.getElementById('flipSpeed');
+    const staggerEl = document.getElementById('stagger');
+    const clockEl = document.getElementById('clock');
+
+    const statusPool = ['ON TIME', 'BOARDING', 'DELAYED', 'FINAL CALL', 'CANCELLED', 'GATE CHANGE'];
+
+    function tickClock() {
+      const now = new Date();
+      clockEl.textContent = now.toLocaleString([], {
+        year: 'numeric', month: 'short', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      });
+    }
+    setInterval(tickClock, 1000);
+    tickClock();
+
+    function setHeaderCollapsed(collapsed) {
+      headerPanel.classList.toggle('collapsed', collapsed);
+      toggleHeaderBtn.textContent = collapsed ? 'Expand nav' : 'Collapse nav';
+    }
+
+    function normalizeText(value, length) {
+      const clean = (value || '').toUpperCase().replace(/[^A-Z0-9 .\/\-]/g, ' ');
+      return clean.padEnd(length, ' ').slice(0, length);
+    }
+
+    function parseInput(text) {
+      return text
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(Boolean)
+        .map(line => {
+          const parts = line.split('|').map(v => v.trim());
+          return {
+            time: normalizeText(parts[0] || '', FIELD_LENGTHS.time),
+            flight: normalizeText(parts[1] || '', FIELD_LENGTHS.flight),
+            destination: normalizeText(parts[2] || '', FIELD_LENGTHS.destination),
+            status: normalizeText(parts[3] || '', FIELD_LENGTHS.status)
+          };
+        });
+    }
+
+    function classifyStatus(statusText) {
+      const s = statusText.trim();
+      if (s.includes('CANCEL')) return 'status-cancel';
+      if (s.includes('DELAY') || s.includes('FINAL')) return 'status-late';
+      return 'status-ok';
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function createCharEl(char = ' ') {
+      const root = document.createElement('div');
+      root.className = 'flap-char';
+      root.dataset.char = char;
+      root.innerHTML = `
+        <div class="flap-pin left"></div>
+        <div class="flap-pin right"></div>
+        <div class="flap-half top current-top"><span>${escapeHtml(char)}</span></div>
+        <div class="flap-half bottom current-bottom"><span>${escapeHtml(char)}</span></div>
+        <div class="flap-half top flip-top" style="display:none"><span>${escapeHtml(char)}</span></div>
+        <div class="flap-half bottom flip-bottom" style="display:none"><span>${escapeHtml(char)}</span></div>
+      `;
+      return root;
+    }
+
+    function createGroup(text, length, extraClass = '') {
+      const group = document.createElement('div');
+      group.className = 'flap-group ' + extraClass;
+      const normalized = normalizeText(text, length);
+      [...normalized].forEach(ch => group.appendChild(createCharEl(ch)));
+      group.dataset.value = normalized;
+      return group;
+    }
+
+    function createRow(rowData) {
+      const row = document.createElement('div');
+      row.className = 'board-row';
+      row.append(
+        createGroup(rowData.time, FIELD_LENGTHS.time),
+        createGroup(rowData.flight, FIELD_LENGTHS.flight),
+        createGroup(rowData.destination, FIELD_LENGTHS.destination),
+        createGroup(rowData.status, FIELD_LENGTHS.status, 'status-group ' + classifyStatus(rowData.status))
+      );
+      return row;
+    }
+
+    function buildBoard(rows) {
+      boardEl.querySelectorAll('.board-row').forEach(el => el.remove());
+      rows.forEach(row => boardEl.appendChild(createRow(row)));
+      rowsCountEl.textContent = rows.length;
+      charCountEl.textContent = rows.length * (FIELD_LENGTHS.time + FIELD_LENGTHS.flight + FIELD_LENGTHS.destination + FIELD_LENGTHS.status);
+    }
+
+    function nextChar(current) {
+      const idx = CHARSET.indexOf(current);
+      return idx === -1 ? CHARSET[0] : CHARSET[(idx + 1) % CHARSET.length];
+    }
+
+    function animateCharTo(el, targetChar, delay = 0, flipDuration = 160) {
+      return new Promise(resolve => {
+        let current = el.dataset.char || ' ';
+        targetChar = targetChar || ' ';
+        if (current === targetChar) {
+          setTimeout(resolve, delay);
+          return;
+        }
+
+        const doStep = () => {
+          const next = nextChar(current);
+          const currentTop = el.querySelector('.current-top span');
+          const currentBottom = el.querySelector('.current-bottom span');
+          const flipTop = el.querySelector('.flip-top');
+          const flipBottom = el.querySelector('.flip-bottom');
+          const flipTopSpan = flipTop.querySelector('span');
+          const flipBottomSpan = flipBottom.querySelector('span');
+
+          el.style.setProperty('--flip-duration', flipDuration + 'ms');
+          currentTop.textContent = current;
+          currentBottom.textContent = current;
+          flipTopSpan.textContent = current;
+          flipBottomSpan.textContent = next;
+          flipTop.style.display = 'flex';
+          flipBottom.style.display = 'flex';
+          el.classList.remove('flipping');
+          void el.offsetWidth;
+          el.classList.add('flipping');
+
+          setTimeout(() => {
+            current = next;
+            el.dataset.char = current;
+            currentTop.textContent = current;
+            currentBottom.textContent = current;
+            flipTop.style.display = 'none';
+            flipBottom.style.display = 'none';
+            el.classList.remove('flipping');
+            if (current !== targetChar) {
+              setTimeout(doStep, 12);
+            } else {
+              resolve();
+            }
+          }, flipDuration * 2 + 8);
+        };
+
+        setTimeout(doStep, delay);
+      });
+    }
+
+    async function animateGroup(group, newValue, groupClass = '') {
+      const chars = [...normalizeText(newValue, group.children.length)];
+      const flipDuration = Number(flipSpeedEl.value || 160);
+      const stagger = Number(staggerEl.value || 22);
+      group.className = 'flap-group ' + groupClass;
+      const tasks = [...group.children].map((charEl, i) => animateCharTo(charEl, chars[i], i * stagger, flipDuration));
+      await Promise.all(tasks);
+      group.dataset.value = chars.join('');
+    }
+
+    async function renderBoardFromInput() {
+      const rows = parseInput(inputDataEl.value);
+      boardTitleRenderEl.textContent = boardTitleEl.value || 'Split-Flap Board';
+      modeLabelEl.textContent = 'Manual input';
+      const existingRows = [...boardEl.querySelectorAll('.board-row')];
+      if (existingRows.length !== rows.length) {
+        buildBoard(rows);
+        return;
+      }
+
+      const rowTasks = existingRows.map((rowEl, rowIndex) => {
+        const data = rows[rowIndex];
+        const groups = rowEl.querySelectorAll('.flap-group');
+        return Promise.all([
+          animateGroup(groups[0], data.time),
+          animateGroup(groups[1], data.flight),
+          animateGroup(groups[2], data.destination),
+          animateGroup(groups[3], data.status, 'status-group ' + classifyStatus(data.status))
+        ]);
+      });
+
+      await Promise.all(rowTasks);
+      rowsCountEl.textContent = rows.length;
+      charCountEl.textContent = rows.length * (FIELD_LENGTHS.time + FIELD_LENGTHS.flight + FIELD_LENGTHS.destination + FIELD_LENGTHS.status);
+    }
+
+    function loadSample(type) {
+      if (type === 'arrivals') {
+        boardTitleEl.value = 'Belgrade Airport — Arrivals';
+        inputDataEl.value = [
+          '08:05|JU501|TIVAT|LANDED',
+          '08:45|LX1418|ZURICH|ON TIME',
+          '09:10|AZ876|ROME|DELAYED',
+          '09:50|KL1987|AMSTERDAM|APPROACHING',
+          '10:30|LO571|WARSAW|BAGGAGE',
+          '11:20|A319|ATHENS|LANDED'
+        ].join('\n');
+        modeLabelEl.textContent = 'Arrivals preset';
+      } else {
+        boardTitleEl.value = 'Belgrade Airport — Departures';
+        inputDataEl.value = [
+          '08:15|JU214|LONDON|BOARDING',
+          '09:05|LH1739|MUNICH|ON TIME',
+          '09:50|OS738|VIENNA|DELAYED',
+          '10:20|AF1391|PARIS|GATE CHANGE',
+          '11:10|TK1084|ISTANBUL|FINAL CALL',
+          '12:45|W64101|ROME|ON TIME'
+        ].join('\n');
+        modeLabelEl.textContent = 'Departures preset';
+      }
+      renderBoardFromInput();
+    }
+
+    function randomizeStatus() {
+      const rows = parseInput(inputDataEl.value).map(row => ({
+        ...row,
+        status: normalizeText(statusPool[Math.floor(Math.random() * statusPool.length)], FIELD_LENGTHS.status)
+      }));
+      inputDataEl.value = rows.map(r => [r.time.trim(), r.flight.trim(), r.destination.trim(), r.status.trim()].join('|')).join('\n');
+      modeLabelEl.textContent = 'Randomized';
+      renderBoardFromInput();
+    }
+
+    renderBtn.addEventListener('click', renderBoardFromInput);
+    shuffleBtn.addEventListener('click', randomizeStatus);
+    sampleArrivalsBtn.addEventListener('click', () => loadSample('arrivals'));
+    sampleDeparturesBtn.addEventListener('click', () => loadSample('departures'));
+    shuffleBtnCompact.addEventListener('click', randomizeStatus);
+    sampleArrivalsBtnCompact.addEventListener('click', () => loadSample('arrivals'));
+    sampleDeparturesBtnCompact.addEventListener('click', () => loadSample('departures'));
+    toggleHeaderBtn.addEventListener('click', () => setHeaderCollapsed(!headerPanel.classList.contains('collapsed')));
+    boardTitleEl.addEventListener('input', () => boardTitleRenderEl.textContent = boardTitleEl.value || 'Split-Flap Board');
+
+    buildBoard(parseInput(inputDataEl.value));
+    boardTitleRenderEl.textContent = boardTitleEl.value;
+    setHeaderCollapsed(true);
+  </script>
+</body>
+</html>
