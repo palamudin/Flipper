@@ -322,24 +322,13 @@
     }
 
     .status-group {
-      justify-content: flex-start;
-    }
+  justify-content: flex-start;
+}
 
-    .status-group .flap-char {
-      width: 22px;
-    }
-
-    .status-group .flap-half span {
-      font-size: 24px;
-    }
-
-    .status-group .flap-half.top span {
-      transform: translateY(11px);
-    }
-
-    .status-group .flap-half.bottom span {
-      transform: translateY(-11px);
-    }
+/* keep ONLY color differences */
+.status-ok .flap-half span { color: #eef7df; }
+.status-late .flap-half span { color: #ffe3c2; }
+.status-cancel .flap-half span { color: #ffd0d0; }
 
     .flap-char {
       position: relative;
